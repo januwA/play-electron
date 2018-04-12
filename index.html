@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>小程序添加消息模板</title>
+  <link rel="stylesheet" href="./assets/mdui/css/mdui.min.css" />
+</head>
+
+<body class="mdui-theme-primary-pink mdui-theme-accent-pink padding-top mdui-appbar-with-toolbar mdui-drawer-body-left">
+  <div class="app">
+    <!-- 应用栏 start -->
+    <ajanuw-appbar></ajanuw-appbar>
+
+    <!-- 默认抽屉栏在左侧 -->
+    <ajanuw-drawer></ajanuw-drawer>
+
+    <div class="mdui-container mdui-m-t-1">
+
+      <!-- token start-->
+      <div :class="['mdui-textfield', {'mdui-textfield-invalid' : checkToken}]">
+        <label class="mdui-textfield-label">token or URL</label>
+        <input class="mdui-textfield-input" type="text" v-model.trim="token" tabindex="1" />
+        <div class="mdui-textfield-error">token or URL 不能为空</div>
+      </div>
+      <!-- toten end -->
+
+      <!-- cookie start-->
+      <div :class="['mdui-textfield', {'mdui-textfield-invalid' : checkCookie}]">
+        <label class="mdui-textfield-label">Request Header >> cookie</label>
+        <input class="mdui-textfield-input" type="text" v-model.trim="cookie" tabindex="2" />
+        <div class="mdui-textfield-error">cookie 不能为空</div>
+      </div>
+      <!-- cookie end -->
+
+      <div class="mdui-row">
+        <div class="mdui-col-xs-3">
+          <!-- select start -->
+          <select ref="selector" class="mdui-select" v-model="selected" mdui-select>
+            <option v-for="(el ,index) in selecteData" :value="index" v-text="el">
+            </option>
+          </select>
+        </div>
+        <div class="mdui-col-xs-9">
+          <button class="mdui-btn mdui-btn-block mdui-color-theme-accent mdui-ripple mdui-hoverable" @click.stop="run">run</button>
+        </div>
+      </div>
+
+      <!-- 执行结果 start-->
+      <div class="mdui-typo" v-if="resData && resData.length">
+        <h3>执行结果：</h3>
+        <ul class="mdui-list" mdui-list-dense>
+          <li v-for="el of resData" :class="['mdui-list-item mdui-ripple mdui-m-y-1', {'mdui-color-yellow-300' : !el.isOk}]">
+            <span class="mdui-m-r-2" v-text="el.id"></span>
+            <span v-text="el.body"></span>
+          </li>
+        </ul>
+      </div>
+      <!-- 执行结果 end -->
+    </div>
+  </div>
+
+  <template id="ajanuw-appbar">
+    <div class="mdui-appbar mdui-appbar-fixed">
+      <div class="mdui-toolbar mdui-color-grey-700 mdui-hoverable">
+        <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}">
+          <i class="mdui-icon material-icons">ac_unit</i>
+        </a>
+        <!-- <div class="mdui-typo-headline">添加模板</div> -->
+        <div class="mdui-toolbar-spacer" style="-webkit-app-region: drag; width: 100%; height: 100%;"></div>
+        <a href="javascript:;" @click="sendMinimize" class="mdui-btn mdui-btn-icon">
+          <i class="mdui-icon material-icons">expand_more</i>
+        </a>
+        <a href="javascript:;" @click="sendmMximize" class="mdui-btn mdui-btn-icon">
+          <i class="mdui-icon material-icons">crop_5_4</i>
+        </a>
+        <a href="javascript:;" @click="sendClose" class="mdui-btn mdui-btn-icon">
+          <i class="mdui-icon material-icons">clear</i>
+        </a>
+      </div>
+    </div>
+  </template>
+
+  <template id="ajanuw-drawer">
+    <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
+      <ul class="mdui-list mdui-m-t-2">
+        <!-- <li class="mdui-list-item mdui-ripple" @click="contactMe">
+          <div class="mdui-list-item-content">联系我</div>
+          <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-blue-400">assistant_photo</i>
+        </li> -->
+      </ul>
+    </div>
+  </template>
+
+  <script src="./assets/mdui/js/mdui.min.js"></script>
+  <!-- <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script> -->
+  <script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+  <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.js"></script>
+  <script>
+    const format = console.log;
+    const rp = require('request-promise');
+    const {
+      shell,
+      ipcRenderer
+    } = require('electron');
+    const {
+      URL
+    } = require('url');
+
+    ipcRenderer.on('index-minimize', (e, msg) => {
+      // 监听主进程发来的事件...
+    })
+
+    // 兼容 网址 和 token数字
+    function checkToken(str) {
+      if (_.parseInt(str)) return str;
+      // 获取网址中的token
+      // url.parce(str,true).query.token;
+      return new URL(str).searchParams.get('token');
+    }
+
+    const vm_vue = new Vue({
+      data() {
+        return {
+          token: '',
+          cookie: '',
+          checkToken: false,
+          checkCookie: false,
+          resData: [],
+          selecteData: ['商城模板', '同城模板'],
+          selected: 0,
+          scmb: null, // 商城模板
+          tcmb: null, // 同城模板
+        }
+      },
+      created() {
+        Object.assign(this, {
+          scmb: require('./db/scmb.js'),
+          tcmb: require('./db/tcmb.js')
+        });
+      },
+      methods: {
+        run() {
+          if (this.token === '') {
+            this.checkToken = true;
+            shell.beep();
+            return;
+          } else {
+            this.checkToken = false;
+          }
+
+          if (this.cookie === '') {
+            this.checkCookie = true;
+            shell.beep();
+            return;
+          } else {
+            this.checkCookie = false;
+          }
+
+          this.resData = [];
+          switch (+this.$refs.selector.selectedIndex) {
+            case 0:
+              this.postMB(this.scmb);
+              break;
+            case 1:
+              this.postMB(this.tcmb);
+              break;
+          }
+        },
+        postMB(data) { //添加模板
+          if (_.isEmpty(data)) {
+            mdui.snackbar({
+              message: '执行完成！',
+              timeout: 2000,
+              position: 'right-bottom'
+            });
+            return;
+          };
+
+          const url = "https://mp.weixin.qq.com/wxopen/tmplmsg";
+
+          const postData = {
+            token: checkToken(this.token),
+            lang: 'zh_CN',
+            f: 'json',
+            ajax: '1',
+            random: _.random(0, 1, true),
+            action: 'tmpl_apply',
+          };
+
+          _.forEach(_.head(data), (v, k) => {
+            _.assign(postData, {
+              [k]: v
+            })
+          });
+
+          const headers = { // 头信息
+            'Connection': 'keep-alive',
+            'Content-Length': postData.length,
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.4882.400 QQBrowser/9.7.13059.400',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Referer': 'https://mp.weixin.qq.com/wxopen/tmplmsg?action=tmpl_select&store_tmpl_id=AT0677&token=2086424651&lang=zh_CN',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'zh-CN,zh;q=0.8',
+            'Cookie': this.cookie,
+          };
+
+          var options = {
+            uri: url,
+            method: 'POST',
+            headers: headers,
+            formData: postData,
+            transform(body) {
+              if (_.isString(body)) return JSON.parse(body);
+              return body;
+            }
+          };
+
+          let self = this;
+
+          rp(options).then(body => {
+            self.resData.push({
+              isOk: body['base_resp']['err_msg'] === 'ok' ? true : false,
+              id: _.head(data)['store_tmpl_id'],
+              body: body
+            });
+            return self.postMB(_.drop(data));
+          })
+
+        }
+      },
+      components: {
+        'ajanuw-appbar': {
+          methods: {
+            sendClose() { // closr
+              ipcRenderer.send('master-close', 'render-index')
+            },
+            sendMinimize() { // minimize
+              ipcRenderer.send('master-minimize', 'render-index')
+            },
+            sendmMximize() { // maximize
+              ipcRenderer.send('master-maximize', 'render-index')
+            }
+          },
+          template: '#ajanuw-appbar'
+        },
+        'ajanuw-drawer': {
+          methods: {
+            contactMe() {
+              shell.openExternal('http://www.cnblogs.com/ajanuw/')
+            }
+          },
+          template: '#ajanuw-drawer'
+        }
+      },
+      mounted() {
+
+      }
+    }).$mount('.app');
+  </script>
+</body>
+
+</html>
