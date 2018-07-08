@@ -17,10 +17,22 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    frame: false
+    backgroundColor: '#f48', // 优雅地显示窗口
+    // frame: false
   });
 
-  //并加载应用程序的index.html。
+
+  /**
+   * ! 优雅地显示窗口
+   */
+  mainWindow.once('ready-to-show', () => {
+    win.show()
+  })
+
+
+  /**
+   * * 加载本地HTML文件
+   */
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
     protocol: 'file:',
@@ -28,10 +40,15 @@ function createWindow() {
     slashes: true
   }))
 
-  //打开DevTools。
+
+  /**
+   * * 打开DevTools
+   */
   // mainWindow.webContents.openDevTools()
 
-  //关闭窗口时发出。
+  /**
+   * * 关闭窗口时发出。
+   */
   mainWindow.on('closed', function () {
     //解引用窗口对象，通常你会存储窗口
     //如果您的应用程序支持多窗口，则在数组中，现在是时候了
@@ -68,23 +85,23 @@ app.on('activate', function () {
 /**
  * * 监听index.html 发送的事件
  */
-ipcMain.on('master-close', (e, msg) => {
-  // 关闭master进程
-  app.quit();
-})
+// ipcMain.on('master-close', (e, msg) => {
+//   // 关闭master进程
+//   app.quit();
+// })
 
-ipcMain.on('master-minimize', (e, msg) => {
-  // 最小化  master进程
-  mainWindow.minimize();
-  // 主进程向 渲染进程发送消息
-  // e.sender.send('index-minimize', 'master')
-})
+// ipcMain.on('master-minimize', (e, msg) => {
+//   // 最小化  master进程
+//   mainWindow.minimize();
+//   // 主进程向 渲染进程发送消息
+//   // e.sender.send('index-minimize', 'master')
+// })
 
-ipcMain.on('master-maximize', (e, msg) => {
-  // 最大化  master进程
-  if (mainWindow.isMaximized()) {
-    mainWindow.unmaximize()
-  } else {
-    mainWindow.maximize();
-  }
-})
+// ipcMain.on('master-maximize', (e, msg) => {
+//   // 最大化  master进程
+//   if (mainWindow.isMaximized()) {
+//     mainWindow.unmaximize()
+//   } else {
+//     mainWindow.maximize();
+//   }
+// })

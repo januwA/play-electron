@@ -4,16 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <title>小程序添加消息模板</title>
-  <link rel="stylesheet" href="./assets/mdui/css/mdui.min.css" />
+  <link href="https://cdn.bootcss.com/mdui/0.4.1/css/mdui.min.css" rel="stylesheet">
 </head>
 
 <body class="mdui-theme-primary-pink mdui-theme-accent-pink padding-top mdui-appbar-with-toolbar mdui-drawer-body-left">
   <div class="app">
     <!-- 应用栏 start -->
-    <ajanuw-appbar></ajanuw-appbar>
+    <!-- <ajanuw-appbar></ajanuw-appbar> -->
 
     <!-- 默认抽屉栏在左侧 -->
-    <ajanuw-drawer></ajanuw-drawer>
+    <!-- <ajanuw-drawer></ajanuw-drawer> -->
 
     <div class="mdui-container mdui-m-t-1">
 
@@ -92,10 +92,9 @@
     </div>
   </template>
 
-  <script src="./assets/mdui/js/mdui.min.js"></script>
-  <!-- <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script> -->
+  <script src="https://cdn.bootcss.com/mdui/0.4.1/js/mdui.min.js"></script>
   <script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
-  <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.js"></script>
+  <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.min.js"></script>
   <script>
     const format = console.log;
     const rp = require('request-promise');
@@ -106,10 +105,8 @@
     const {
       URL
     } = require('url');
-
-    ipcRenderer.on('index-minimize', (e, msg) => {
-      // 监听主进程发来的事件...
-    })
+    // 监听主进程发来的事件...
+    // ipcRenderer.on('index-minimize', (e, msg) => { })
 
     // 兼容 网址 和 token数字
     function checkToken(str) {
@@ -127,17 +124,17 @@
           checkToken: false,
           checkCookie: false,
           resData: [],
-          selecteData: ['商城模板', '同城模板'],
+          selecteData: [
+            '同城小程序', 
+            '商城小程序', 
+            '美容小程序', 
+            '家政小程序',
+            '超人跑腿',
+            '脐橙拼车',
+            '视频小程序'
+          ],
           selected: 0,
-          scmb: null, // 商城模板
-          tcmb: null, // 同城模板
         }
-      },
-      created() {
-        Object.assign(this, {
-          scmb: require('./db/scmb.js'),
-          tcmb: require('./db/tcmb.js')
-        });
       },
       methods: {
         run() {
@@ -158,12 +155,29 @@
           }
 
           this.resData = [];
-          switch (+this.$refs.selector.selectedIndex) {
+
+          // console.log( +this.$refs.selector.selectedIndex );
+          
+          switch (+this.$refs.selector.selectedIndex) { // 渲染更具selectData
             case 0:
-              this.postMB(this.scmb);
+              this.postMB(require('./db/tcmb.js'));
               break;
             case 1:
-              this.postMB(this.tcmb);
+              this.postMB(require('./db/scmb.js'));
+            case 2:
+              this.postMB(require('./db/mr.js'));
+              break;
+            case 3:
+              this.postMB(require('./db/jz.js'));
+              break
+            case 4: 
+              this.postMB(require('./db/crpt.js'));
+              break;
+            case 5: 
+              this.postMB(require('./db/qcpc.js'));
+              break;
+            case 6: 
+              this.postMB(require('./db/video_sp.js'));
               break;
           }
         },
@@ -188,11 +202,7 @@
             action: 'tmpl_apply',
           };
 
-          _.forEach(_.head(data), (v, k) => {
-            _.assign(postData, {
-              [k]: v
-            })
-          });
+          _.forEach(_.head(data), (v, k) => _.set(postData, `${k}`, v));
 
           const headers = { // 头信息
             'Connection': 'keep-alive',
@@ -232,28 +242,28 @@
         }
       },
       components: {
-        'ajanuw-appbar': {
-          methods: {
-            sendClose() { // closr
-              ipcRenderer.send('master-close', 'render-index')
-            },
-            sendMinimize() { // minimize
-              ipcRenderer.send('master-minimize', 'render-index')
-            },
-            sendmMximize() { // maximize
-              ipcRenderer.send('master-maximize', 'render-index')
-            }
-          },
-          template: '#ajanuw-appbar'
-        },
-        'ajanuw-drawer': {
-          methods: {
-            contactMe() {
-              shell.openExternal('http://www.cnblogs.com/ajanuw/')
-            }
-          },
-          template: '#ajanuw-drawer'
-        }
+        // 'ajanuw-appbar': {
+        //   methods: {
+        //     sendClose() { // closr
+        //       ipcRenderer.send('master-close', 'render-index')
+        //     },
+        //     sendMinimize() { // minimize
+        //       ipcRenderer.send('master-minimize', 'render-index')
+        //     },
+        //     sendmMximize() { // maximize
+        //       ipcRenderer.send('master-maximize', 'render-index')
+        //     }
+        //   },
+        //   template: '#ajanuw-appbar'
+        // },
+        // 'ajanuw-drawer': {
+        //   methods: {
+        //     contactMe() {
+        //       shell.openExternal('http://www.cnblogs.com/ajanuw/')
+        //     }
+        //   },
+        //   template: '#ajanuw-drawer'
+        // }
       },
       mounted() {
 

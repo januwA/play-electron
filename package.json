@@ -10,6 +10,7 @@
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
+
     "Electron",
     "quick",
     "start",
@@ -29,7 +30,7 @@
       "window": {}
     },
     "win": {
-      "icon": "./favicon.ico"
+      "icon": "./logo.png"
     }
   },
   "dependencies": { 

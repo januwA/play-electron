@@ -74,5 +74,16 @@ module.exports = [{ // 订单支付成功通知
     keyid_num: '2',
     keyid1: '1',
     keyid2: '3',
+  },
+  { // 审核结果通知
+    store_tmpl_id: 'AT0146',
+    keyid_num: 2,
+    keyid1: 33,
+    keyid2: 1,
+  }, { // 新订单通知
+    store_tmpl_id: 'AT0079',
+    keyid_num: 2,
+    keyid1: 6,
+    keyid2: 8,
   }
 ]
