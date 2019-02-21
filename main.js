@@ -44,7 +44,7 @@ function createWindow() {
   /**
    * * 打开DevTools
    */
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   /**
    * * 关闭窗口时发出。

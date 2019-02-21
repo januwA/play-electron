@@ -8,7 +8,7 @@
 </head>
 
 <body class="mdui-theme-primary-pink mdui-theme-accent-pink padding-top mdui-appbar-with-toolbar mdui-drawer-body-left">
-  <div class="app">
+  <div id="app">
     <!-- 应用栏 start -->
     <!-- <ajanuw-appbar></ajanuw-appbar> -->
 
@@ -49,12 +49,12 @@
       <!-- 执行结果 start-->
       <div class="mdui-typo" v-if="resData && resData.length">
         <h3>执行结果：</h3>
-        <ul class="mdui-list" mdui-list-dense>
-          <li v-for="el of resData" :class="['mdui-list-item mdui-ripple mdui-m-y-1', {'mdui-color-yellow-300' : !el.isOk}]">
+        <ol>
+          <li v-for="el of resData" :class="['mdui-m-y-1', {'mdui-color-yellow-300' : !el.isOk}]">
             <span class="mdui-m-r-2" v-text="el.id"></span>
             <span v-text="el.body"></span>
           </li>
-        </ul>
+        </ol>
       </div>
       <!-- 执行结果 end -->
     </div>
@@ -93,10 +93,10 @@
   </template>
 
   <script src="https://cdn.bootcss.com/mdui/0.4.1/js/mdui.min.js"></script>
-  <script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+  <script src="https://unpkg.com/vue@2.6.6/dist/vue.min.js"></script>
   <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.min.js"></script>
   <script>
-    const format = console.log;
+    const l = console.log;
     const rp = require('request-promise');
     const {
       shell,
@@ -116,7 +116,8 @@
       return new URL(str).searchParams.get('token');
     }
 
-    const vm_vue = new Vue({
+    new Vue({
+      el: '#app',
       data() {
         return {
           token: '',
@@ -125,9 +126,9 @@
           checkCookie: false,
           resData: [],
           selecteData: [
-            '同城小程序', 
-            '商城小程序', 
-            '美容小程序', 
+            '同城小程序',
+            '商城小程序',
+            '美容小程序',
             '家政小程序',
             '超人跑腿',
             '脐橙拼车',
@@ -157,26 +158,34 @@
           this.resData = [];
 
           // console.log( +this.$refs.selector.selectedIndex );
-          
+
           switch (+this.$refs.selector.selectedIndex) { // 渲染更具selectData
             case 0:
               this.postMB(require('./db/tcmb.js'));
               break;
+
             case 1:
+              // console.log(require('./db/scmb.js'));
               this.postMB(require('./db/scmb.js'));
+              break;
+
             case 2:
               this.postMB(require('./db/mr.js'));
               break;
+
             case 3:
               this.postMB(require('./db/jz.js'));
-              break
-            case 4: 
+              break;
+
+            case 4:
               this.postMB(require('./db/crpt.js'));
               break;
-            case 5: 
+
+            case 5:
               this.postMB(require('./db/qcpc.js'));
               break;
-            case 6: 
+
+            case 6:
               this.postMB(require('./db/video_sp.js'));
               break;
           }
@@ -268,7 +277,7 @@
       mounted() {
 
       }
-    }).$mount('.app');
+    });
   </script>
 </body>
 
